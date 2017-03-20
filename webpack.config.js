@@ -1,5 +1,6 @@
 var webpack = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
 	devtool: 'eval-source-map', // 配置生成Source Maps
@@ -7,7 +8,7 @@ module.exports = {
 	entry: __dirname + '/app/main.js', // 文件入口
 	output: {
 		path: __dirname + "/public", //打包后文件存放的位置
-		filename: 'bundle.js' // 打包后输出文件的文件名		
+		filename: '[name]-[hash].js' // 打包后输出文件的文件名		
 	},
 
 	module: {
@@ -21,7 +22,7 @@ module.exports = {
 		},
 		{
 			test: /\.css$/,
-			loaders: "style-loader!css-loader?modules!postcss-loader"  //感叹号的作用在于使同一文件能够使用不同类型的loader
+			loaders: ExtractTextPlugin.extract({fallback: "style-loader", use: "css-loader?modules!postcss-loader"})  //感叹号的作用在于使同一文件能够使用不同类型的loader
 		}]
 	},
 
@@ -33,10 +34,12 @@ module.exports = {
         		warnings: false
       		}
     	}),
+    	new webpack.optimize.OccurrenceOrderPlugin(), //为组件分配id
     	new HtmlWebpackPlugin({
     		template: __dirname + "/app/index.tmpl.html"
     	}),
-    	new webpack.HotModuleReplacementPlugin() // 热加载插件
+    	new webpack.HotModuleReplacementPlugin(), // 热加载插件
+    	new ExtractTextPlugin("[name]-[hash].css") // 分离js和css
   	],
 
 	devServer: {
